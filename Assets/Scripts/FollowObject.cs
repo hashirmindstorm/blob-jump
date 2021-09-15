@@ -4,8 +4,8 @@ public class FollowObject : MonoBehaviour
 {
     [SerializeField]
     private GameObject objectToFollow;
-
-    private Vector3 offset = new Vector3(0, 0.88f, -2);
+    [SerializeField]
+    private Vector3 offset;
 
     void LateUpdate()
     {
