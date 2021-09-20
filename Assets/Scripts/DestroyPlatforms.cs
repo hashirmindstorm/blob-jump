@@ -1,23 +1,19 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class DestroyPlatforms : MonoBehaviour
 {
-    private GameObject Player;
-    // Start is called before the first frame update
+    private GameObject player;
+
     void Start()
     {
-        Player = GameObject.Find("Sphere");
+        player = GameObject.Find("Player");
     }
 
-    // Update is called once per frame
     void Update()
     {
-        if(transform.position.z<Player.transform.position.z)
+        if(transform.position.z + 1 < player.transform.position.z)
         {
             Destroy(gameObject);
         }
-        
     }
 }

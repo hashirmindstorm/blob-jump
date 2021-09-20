@@ -2,71 +2,65 @@ using UnityEngine;
 
 public class ProjectileMotionHandler : MonoBehaviour
 {
-    public static bool BouncePlayer(GameObject player, GameObject destTrampoline, float speed)
+    private static float correctionFactorY = 0;
+
+    public static void BouncePlayer(GameObject player, GameObject destTrampoline, float speed, float maxHeight)
     {
-        float gravity = 9.8f;
         Rigidbody rb = player.GetComponent<Rigidbody>();
 
-        Vector3 lowAngleImpulse;
-        Vector3 highAngleImpulse;
+        Vector3 fireVelocity;
+        float gravity;
 
-        int numOfSolutions = SolveBallisticArc(
+        SolveBallisticArcLateral(
+            //new Vector3(0, player.transform.position.y, player.transform.position.z),
             player.transform.position,
             speed,
+            //new Vector3(0, destTrampoline.transform.position.y, destTrampoline.transform.position.z),
             destTrampoline.transform.position,
-            gravity,
-            out lowAngleImpulse,
-            out highAngleImpulse);
+            maxHeight,
+            out fireVelocity,
+            out gravity);
 
-        if (numOfSolutions == 0)
+        FakeGravity.SetGravity(-gravity);
+        fireVelocity += new Vector3(0, correctionFactorY, 0);
+        rb.velocity += fireVelocity;
+    }
+
+    public static void ApplyCorrection(GameObject player, GameObject destTrampoline)
+    {
+        if (player.transform.position.z < destTrampoline.transform.position.z)
         {
-            return false;
+            correctionFactorY += 0.0065f;
         }
         else
         {
-            if (highAngleImpulse != Vector3.zero)
-            {
-                rb.AddForce(highAngleImpulse, ForceMode.Impulse);
-            }
-            else
-            {
-                rb.AddForce(lowAngleImpulse, ForceMode.Impulse);
-            }
-            return true;
+            correctionFactorY -= 0.0065f;
         }
     }
 
-    private static int SolveBallisticArc(Vector3 projPos, float projSpeed, Vector3 target, float gravity, out Vector3 s0, out Vector3 s1)
+    private static bool SolveBallisticArcLateral(Vector3 proj_pos, float lateral_speed, Vector3 target_pos, float max_height, out Vector3 fire_velocity, out float gravity)
     {
-        s0 = Vector3.zero;
-        s1 = Vector3.zero;
+        fire_velocity = Vector3.zero;
+        gravity = float.NaN;
 
-        Vector3 diff = target - projPos;
+        Vector3 diff = target_pos - proj_pos;
         Vector3 diffXZ = new Vector3(diff.x, 0f, diff.z);
-        float groundDist = diffXZ.magnitude;
+        float lateralDist = diffXZ.magnitude;
 
-        float speed2 = projSpeed * projSpeed;
-        float speed4 = projSpeed * projSpeed * projSpeed * projSpeed;
-        float y = diff.y;
-        float x = groundDist;
-        float gx = gravity * x;
+        if (lateralDist == 0)
+            return false;
 
-        float root = speed4 - gravity * (gravity * x * x + 2 * y * speed2);
+        float time = lateralDist / lateral_speed;
 
-        if (root < 0)
-            return 0;
+        fire_velocity = diffXZ.normalized * lateral_speed;
 
-        root = Mathf.Sqrt(root);
+        float a = proj_pos.y;
+        float b = max_height;
+        float c = target_pos.y;
 
-        float lowAng = Mathf.Atan2(speed2 - root, gx);
-        float highAng = Mathf.Atan2(speed2 + root, gx);
-        int numSolutions = lowAng != highAng ? 2 : 1;
+        gravity = -4*(a - 2*b + c) / (time* time);
+        fire_velocity.y = -(3*a - 4*b + c) / time;
 
-        Vector3 groundDir = diffXZ.normalized;
-        s0 = groundDir * Mathf.Cos(lowAng) * projSpeed + Vector3.up * Mathf.Sin(lowAng) * projSpeed;
-        if (numSolutions > 1)
-            s1 = groundDir * Mathf.Cos(highAng) * projSpeed + Vector3.up * Mathf.Sin(highAng) * projSpeed;
-
-        return numSolutions;
+        return true;
     }
 }
