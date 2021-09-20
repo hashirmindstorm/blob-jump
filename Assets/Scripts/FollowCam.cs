@@ -1,11 +1,10 @@
 using UnityEngine;
 
-public class FollowObject : MonoBehaviour
+public class FollowCam : MonoBehaviour
 {
     [SerializeField]
     private GameObject objectToFollow;
-    [SerializeField]
-    private Vector3 offset;
+    private Vector3 offset = new Vector3(0, 1.25f, -2.5f);
 
     void LateUpdate()
     {
