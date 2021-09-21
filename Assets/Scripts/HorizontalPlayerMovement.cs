@@ -3,7 +3,7 @@ using UnityEngine;
 public class HorizontalPlayerMovement : MonoBehaviour
 {
     private Touch touch;
-    private float speedModifier = 0.0165f;
+    private float speedModifier = 0.009f;
 
     private void Update()
     {
