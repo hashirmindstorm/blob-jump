@@ -13,8 +13,10 @@ public class ProjectileMotionHandler : MonoBehaviour
 
         SolveBallisticArcLateral(
             new Vector3(0, player.transform.position.y, player.transform.position.z),
+            //player.transform.position,
             speed,
             new Vector3(0, destTrampoline.transform.position.y, destTrampoline.transform.position.z),
+            //destTrampoline.transform.position,
             maxHeight,
             out fireVelocity,
             out gravity);

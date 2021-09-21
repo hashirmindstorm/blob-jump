@@ -4,11 +4,12 @@ using System.Collections;
 public class MovePlayer : MonoBehaviour
 {
     private Rigidbody rb;
-    private float _speed = 3;
-    private float maxHeight = 5;
+    private float _speed = 3.5f;
+    private float maxHeight = 3.5f;
     private int jumpCount = 0;
     private GameObject nextTramp;
     public TrampolineGetter trampolineGetter;
+    public UIManager uiManager;
 
     private void Start()
     {
@@ -25,8 +26,15 @@ public class MovePlayer : MonoBehaviour
             GameObject currTramp = trampolineGetter.GetCurrentTrampoline();
             ProjectileMotionHandler.ApplyCorrection(gameObject, currTramp);
             transform.position = new Vector3(transform.position.x, transform.position.y, currTramp.transform.position.z);
-            nextTramp = trampolineGetter.GetNextTrampoline();
             StartCoroutine(PerformJump());
+        }
+
+        else
+        {
+            rb.velocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+
+            uiManager.ActivateUI();
         }
     }
 
@@ -41,7 +49,8 @@ public class MovePlayer : MonoBehaviour
 
     private IEnumerator PerformJump()
     {
-        yield return new WaitForSeconds(0.1f);
+        yield return new WaitForSeconds(0.02f);
+        nextTramp = trampolineGetter.GetNextTrampoline();
         ProjectileMotionHandler.BouncePlayer(gameObject, nextTramp, _speed, maxHeight);
         ++jumpCount;
     }
